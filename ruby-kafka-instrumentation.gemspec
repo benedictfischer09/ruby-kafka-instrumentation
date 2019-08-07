@@ -1,17 +1,17 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "ruby/kafka/instrumentation/version"
+require "kafka/instrumentation/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "ruby-kafka-instrumentation"
-  spec.version       = Ruby::Kafka::Instrumentation::VERSION
+  spec.version       = Kafka::Instrumentation::VERSION
   spec.authors       = ["Ben Fischer"]
   spec.email         = ["ben.fischer.810@gmail.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because RubyGems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
-  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.summary       = %q{Instruments the ruby kafka gem for open tracing}
+  spec.description   = %q{Instruments the ruby kafka gem for open tracing}
+  spec.homepage      = "https://github.com/benedictfischer09/ruby-kafka-instrumentation"
   spec.license       = "MIT"
 
   # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
