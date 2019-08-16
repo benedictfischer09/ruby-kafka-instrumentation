@@ -21,7 +21,7 @@ Or install it yourself as:
 ## Usage
 First load the opentracing (Note: this won't automatically instrument the http gem)
 ```
-require "kafka/tracer"
+require "kafka-opentracing"
 ```
 
 If you have setup `OpenTracing.global_tracer` you can turn on spans for all requests with just:
