@@ -5,18 +5,27 @@ require 'opentracing'
 
 module Kafka
   module Instrumentation
+    class IncompatibleGemVersion < StandardError; end;
+
     class << self
       attr_accessor :ignore_message, :tracer
 
       IngoreMessage = ->(_value, _key, _headers, _topic, _partition, _partition_key) { false }
 
       def instrument(tracer: OpenTracing.global_tracer, ignore_message: IngoreMessage)
+        raise IncompatibleGemVersion unless compatible_version?
+
         @ignore_message = ignore_message
         @tracer = tracer
         patch_producer_produce
         patch_client_deliver_message
         patch_client_each_message
         patch_consumer_each_message
+      end
+
+      def compatible_version?
+        # https://github.com/zendesk/ruby-kafka/pull/604
+        Gem::Version.new(Kafka::VERSION) >= Gem::Version.new("0.7.0")
       end
 
       def remove
