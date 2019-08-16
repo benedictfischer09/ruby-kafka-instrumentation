@@ -1,16 +1,16 @@
 
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require "kafka/instrumentation/version"
+require "kafka/tracer/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "ruby-kafka-instrumentation"
-  spec.version       = Kafka::Instrumentation::VERSION
+  spec.name          = "kafka-opentracing"
+  spec.version       = Kafka::Tracer::VERSION
   spec.authors       = ["Ben Fischer"]
   spec.email         = ["ben.fischer.810@gmail.com"]
 
-  spec.summary       = %q{Instruments the ruby kafka gem for open tracing}
-  spec.description   = %q{Instruments the ruby kafka gem for open tracing}
+  spec.summary       = %q{Instruments the ruby-kafka gem for opentracing}
+  spec.description   = %q{Instruments the ruby-kafka gem for opentracing}
   spec.homepage      = "https://github.com/benedictfischer09/ruby-kafka-instrumentation"
   spec.license       = "MIT"
 

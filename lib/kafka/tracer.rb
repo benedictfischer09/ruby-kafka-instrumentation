@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'kafka/instrumentation/version'
+require 'kafka/tracer/version'
 require 'opentracing'
 
 module Kafka
-  module Instrumentation
+  module Tracer
     class IncompatibleGemVersion < StandardError; end;
 
     class << self
@@ -68,7 +68,7 @@ module Kafka
           alias_method :deliver_message_original, :deliver_message
 
           def deliver_message(value, key: nil, headers: {}, topic:, partition: nil, partition_key: nil, retries: 1)
-            if ::Kafka::Instrumentation.ignore_message.call(value, key, headers, topic, partition, partition_key)
+            if ::Kafka::Tracer.ignore_message.call(value, key, headers, topic, partition, partition_key)
               result = deliver_message_original(value,
                                                 key: key,
                                                 headers: headers,
@@ -86,7 +86,7 @@ module Kafka
                 'message_bus.pending_message' => false
               }
 
-              tracer = ::Kafka::Instrumentation.tracer
+              tracer = ::Kafka::Tracer.tracer
 
               tracer.start_active_span('kafka.producer', tags: tags) do |scope|
                 OpenTracing.inject(scope.span.context, OpenTracing::FORMAT_TEXT_MAP, headers)
@@ -118,7 +118,7 @@ module Kafka
 
           def produce(value, key: nil, headers: {}, topic:, partition: nil, partition_key: nil, create_time: Time.now)
 
-            if ::Kafka::Instrumentation.ignore_message.call(value, key, headers, topic, partition, partition_key)
+            if ::Kafka::Tracer.ignore_message.call(value, key, headers, topic, partition, partition_key)
               result = produce_original(
                 value,
                 key: key,
@@ -139,7 +139,7 @@ module Kafka
                 'message_bus.pending_message' => true
               }
 
-              tracer = ::Kafka::Instrumentation.tracer
+              tracer = ::Kafka::Tracer.tracer
 
               tracer.start_active_span('kafka.producer', tags: tags) do |scope|
                 OpenTracing.inject(scope.span.context, OpenTracing::FORMAT_TEXT_MAP, headers)
@@ -174,7 +174,7 @@ module Kafka
           alias_method :each_message_original, :each_message
 
           def each_message(topic:, start_from_beginning: true, max_wait_time: 5, min_bytes: 1, max_bytes: 1_048_576, &block)
-            tracer = ::Kafka::Instrumentation.tracer
+            tracer = ::Kafka::Tracer.tracer
 
             wrapped_block = lambda { |message|
               context = tracer.extract(OpenTracing::FORMAT_TEXT_MAP, message.headers)
@@ -214,7 +214,7 @@ module Kafka
           alias_method :each_message_original, :each_message
 
           def each_message(min_bytes: 1, max_bytes: 10485760, max_wait_time: 1, automatically_mark_as_processed: true)
-            tracer = ::Kafka::Instrumentation.tracer
+            tracer = ::Kafka::Tracer.tracer
 
             wrapped_block = lambda { |message|
               context = tracer.extract(OpenTracing::FORMAT_TEXT_MAP, message.headers)

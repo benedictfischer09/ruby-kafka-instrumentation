@@ -4,16 +4,16 @@ require 'uri'
 require 'kafka'
 require 'opentracing'
 
-RSpec.describe Kafka::Instrumentation do
+RSpec.describe Kafka::Tracer do
   describe '#patch_client_deliver_message' do
     let(:client) { Kafka::Client.new(seed_brokers: ['localhost']) }
     after do
-      Kafka::Instrumentation.remove
+      Kafka::Tracer.remove
     end
 
     it 'starts a span for the message' do
       tracer = double(start_active_span: true)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
       client.deliver_message('hello', headers: {}, topic: 'test')
       expect(tracer).to have_received(:start_active_span)
     end
@@ -22,7 +22,7 @@ RSpec.describe Kafka::Instrumentation do
       tracer = double(start_active_span: true)
       allow(client).to receive(:deliver_message_original)
 
-      Kafka::Instrumentation.instrument(
+      Kafka::Tracer.instrument(
         tracer: tracer,
         ignore_message: ->(_value, _key, _headers, topic, _, _) { topic == 'ignore' }
       )
@@ -37,7 +37,7 @@ RSpec.describe Kafka::Instrumentation do
 
     it 'follows semantic conventions for the span tags' do
       tracer = double(start_active_span: true)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
 
       client.deliver_message('hello', headers: {}, topic: 'testing')
 
@@ -62,7 +62,7 @@ RSpec.describe Kafka::Instrumentation do
       tracer = double(start_active_span: true)
       allow(tracer).to receive(:start_active_span).and_yield(scope)
 
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
 
       allow(client).to receive(:deliver_message_original).and_raise(error)
 
@@ -92,12 +92,12 @@ RSpec.describe Kafka::Instrumentation do
     end
 
     after do
-      Kafka::Instrumentation.remove
+      Kafka::Tracer.remove
     end
 
     it 'starts a span for the message' do
       tracer = double(start_active_span: true)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
       producer.produce('hello', headers: {}, topic: 'test')
       expect(tracer).to have_received(:start_active_span)
     end
@@ -105,7 +105,7 @@ RSpec.describe Kafka::Instrumentation do
     it 'can be configured to skip creating a span for some messages' do
       tracer = double(start_active_span: true)
 
-      Kafka::Instrumentation.instrument(
+      Kafka::Tracer.instrument(
         tracer: tracer,
         ignore_message: ->(_value, _key, _headers, topic, _, _) { topic == 'ignore' }
       )
@@ -121,7 +121,7 @@ RSpec.describe Kafka::Instrumentation do
 
     it 'follows semantic conventions for the span tags' do
       tracer = double(start_active_span: true)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
 
       producer.produce('hello', headers: {}, topic: 'testing')
 
@@ -146,7 +146,7 @@ RSpec.describe Kafka::Instrumentation do
       tracer = double(start_active_span: true)
       allow(tracer).to receive(:start_active_span).and_yield(scope)
 
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
 
       allow(producer).to receive(:produce_original).and_raise(error)
 
@@ -161,7 +161,7 @@ RSpec.describe Kafka::Instrumentation do
   describe '#patch_client_each_message' do
     let(:client) { Kafka::Client.new(seed_brokers: ['localhost']) }
     after do
-      Kafka::Instrumentation.remove
+      Kafka::Tracer.remove
     end
 
     it 'extracts the context from the message headers' do
@@ -172,7 +172,7 @@ RSpec.describe Kafka::Instrumentation do
                                 topic: 'test')
       allow(tracer).to receive(:extract)
       allow(client).to receive(:each_message_original).and_yield(message)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
 
       client.each_message(topic: 'test') { ; }
 
@@ -188,7 +188,7 @@ RSpec.describe Kafka::Instrumentation do
                                 topic: 'test')
       allow(tracer).to receive(:extract).and_return(context)
       allow(client).to receive(:each_message_original).and_yield(message)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
 
       client.each_message(topic: 'test') { ; }
 
@@ -215,7 +215,7 @@ RSpec.describe Kafka::Instrumentation do
                                 topic: 'test')
       allow(tracer).to receive(:extract)
       allow(client).to receive(:each_message_original).and_yield(message)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
       error = StandardError.new("stop")
 
       expect do
@@ -240,7 +240,7 @@ RSpec.describe Kafka::Instrumentation do
       )
     end
     after do
-      Kafka::Instrumentation.remove
+      Kafka::Tracer.remove
     end
 
     it 'extracts the context from the message headers' do
@@ -251,7 +251,7 @@ RSpec.describe Kafka::Instrumentation do
                                 topic: 'test')
       allow(tracer).to receive(:extract)
       allow(consumer).to receive(:each_message_original).and_yield(message)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
 
       consumer.each_message { ; }
 
@@ -267,7 +267,7 @@ RSpec.describe Kafka::Instrumentation do
                                 topic: 'test')
       allow(tracer).to receive(:extract).and_return(context)
       allow(consumer).to receive(:each_message_original).and_yield(message)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
 
       consumer.each_message { ; }
 
@@ -294,7 +294,7 @@ RSpec.describe Kafka::Instrumentation do
                                 topic: 'test')
       allow(tracer).to receive(:extract)
       allow(consumer).to receive(:each_message_original).and_yield(message)
-      Kafka::Instrumentation.instrument(tracer: tracer)
+      Kafka::Tracer.instrument(tracer: tracer)
       error = StandardError.new("stop")
 
       expect do

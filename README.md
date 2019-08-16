@@ -1,4 +1,4 @@
-# Kafka::Instrumentation
+# Kafka Opentracing
 
 Open Tracing instrumentation for the [kafka gem](https://github.com/zendesk/ruby-kafka). By default it starts a new span for every message written to kafka and propogates the span context when any consumer consumes the message. It follows the open tracing tagging [semantic conventions](https://opentracing.io/specification/conventions)
 
@@ -7,7 +7,7 @@ Open Tracing instrumentation for the [kafka gem](https://github.com/zendesk/ruby
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'ruby-kafka-instrumentation'
+gem 'kafka-opentracing'
 ```
 
 And then execute:
@@ -16,22 +16,22 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install ruby-kafka-instrumentation
+    $ gem install kafka-opentracing
 
 ## Usage
-First load the instrumentation (Note: this won't automatically instrument the http gem)
+First load the opentracing (Note: this won't automatically instrument the http gem)
 ```
-require "kafka/instrumentation"
+require "kafka/tracer"
 ```
 
 If you have setup `OpenTracing.global_tracer` you can turn on spans for all requests with just:
 ```
-    Kafka::Instrumentation.instrument
+    Kafka::Tracer.instrument
 ```
 
 If you need more control over the tracer or which requests get their own span you can configure both settings like:
 ```
-    Kafka::Instrumentation.instrument(
+    Kafka::Tracer.instrument(
         tracer: tracer,
         ignore_message: ->(value, key, headers, topic, partition, partition_key) { topic == 'testing' }
     )
@@ -51,4 +51,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the Kafka::Instrumentation project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/benedictfischer09/ruby-kafka-instrumentation/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/benedictfischer09/ruby-kafka-instrumentation/blob/master/CODE_OF_CONDUCT.md).
