@@ -20,6 +20,7 @@ RSpec.describe Kafka::Instrumentation do
 
     it 'can be configured to skip creating a span for some messages' do
       tracer = double(start_active_span: true)
+      allow(client).to receive(:deliver_message_original)
 
       Kafka::Instrumentation.instrument(
         tracer: tracer,
@@ -28,6 +29,7 @@ RSpec.describe Kafka::Instrumentation do
 
       client.deliver_message('hello', headers: {}, topic: 'ignore')
       expect(tracer).not_to have_received(:start_active_span)
+      expect(client).to have_received(:deliver_message_original)
 
       client.deliver_message('hello', headers: {}, topic: 'test')
       expect(tracer).to have_received(:start_active_span)
