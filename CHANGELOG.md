@@ -1,6 +1,9 @@
 Changelog
 =========
 
+## 0.2.0 08/16/2019
+  * Catch load errors when kafka is not present
+
 ## 0.1.0 08/08/2019
   * Instrumention for open tracing
   * Producer apis

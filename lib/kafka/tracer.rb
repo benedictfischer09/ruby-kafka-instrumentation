@@ -13,6 +13,11 @@ module Kafka
       IngoreMessage = ->(_value, _key, _headers, _topic, _partition, _partition_key) { false }
 
       def instrument(tracer: OpenTracing.global_tracer, ignore_message: IngoreMessage)
+        begin
+          require 'kafka'
+        rescue LoadError
+          return
+        end
         raise IncompatibleGemVersion unless compatible_version?
 
         @ignore_message = ignore_message
