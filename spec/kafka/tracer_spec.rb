@@ -35,6 +35,19 @@ RSpec.describe Kafka::Tracer do
       expect(tracer).to have_received(:start_active_span)
     end
 
+    it 'handles errors from ignore message and produces it anyway' do
+      tracer = double(start_active_span: true)
+      allow(client).to receive(:deliver_message_original)
+
+      Kafka::Tracer.instrument(
+        tracer: tracer,
+        ignore_message: ->(_value, _key, _headers, topic, _, _) { raise 'error' }
+      )
+
+      client.deliver_message('hello', headers: {}, topic: 'ignore')
+      expect(client).to have_received(:deliver_message_original)
+    end
+
     it 'follows semantic conventions for the span tags' do
       tracer = double(start_active_span: true)
       Kafka::Tracer.instrument(tracer: tracer)
@@ -116,6 +129,19 @@ RSpec.describe Kafka::Tracer do
 
       producer.produce('hello', headers: {}, topic: 'test')
       expect(tracer).to have_received(:start_active_span)
+      expect(producer).to have_received(:produce_original)
+    end
+
+    it 'handles errors from ignore message and produces it anyway' do
+      tracer = double(start_active_span: true)
+
+      Kafka::Tracer.instrument(
+        tracer: tracer,
+        ignore_message: ->(_value, _key, _headers, topic, _, _) { raise 'error' }
+      )
+      allow(producer).to receive(:produce_original)
+
+      producer.produce('hello', headers: {}, topic: 'test')
       expect(producer).to have_received(:produce_original)
     end
 
