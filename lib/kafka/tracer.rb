@@ -192,7 +192,7 @@ module Kafka
                 'message_bus.pre_fetched_in_batch' => true
               }
 
-              tracer.start_active_span('kafka.consumer', child_of: context, tags: tags) do |scope|
+              tracer.start_active_span('kafka.consumer', follows_from: context, tags: tags) do |scope|
                 begin
                   block.call(message)
                 rescue StandardError
@@ -232,7 +232,7 @@ module Kafka
                 'message_bus.pre_fetched_in_batch' => true
               }
 
-              tracer.start_active_span('kafka.consumer', child_of: context, tags: tags) do |scope|
+              tracer.start_active_span('kafka.consumer', follows_from: context, tags: tags) do |scope|
                 begin
                   yield message
                 rescue StandardError
