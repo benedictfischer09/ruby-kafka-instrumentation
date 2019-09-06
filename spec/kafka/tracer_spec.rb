@@ -182,19 +182,21 @@ RSpec.describe Kafka::Tracer do
     it 'starts a new span with the parent context' do
       tracer = double(start_active_span: true)
       context = double
+      reference = double
       message = instance_double(Kafka::FetchedMessage,
                                 headers: {},
                                 partition: "A",
                                 topic: 'test')
       allow(tracer).to receive(:extract).and_return(context)
       allow(client).to receive(:each_message_original).and_yield(message)
+      allow(OpenTracing::Reference).to receive(:follows_from).and_return(reference)
       Kafka::Tracer.instrument(tracer: tracer)
 
       client.each_message(topic: 'test') { ; }
 
       expect(tracer).to have_received(:start_active_span).with(
         'kafka.consumer',
-        child_of: context,
+        references: [reference],
         tags: {
           'component' => 'ruby-kafka',
           'span.kind' => 'consumer',
@@ -261,19 +263,21 @@ RSpec.describe Kafka::Tracer do
     it 'starts a new span with the parent context' do
       tracer = double(start_active_span: true)
       context = double
+      reference = double
       message = instance_double(Kafka::FetchedMessage,
                                 headers: {},
                                 partition: "A",
                                 topic: 'test')
       allow(tracer).to receive(:extract).and_return(context)
       allow(consumer).to receive(:each_message_original).and_yield(message)
+      allow(OpenTracing::Reference).to receive(:follows_from).and_return(reference)
       Kafka::Tracer.instrument(tracer: tracer)
 
       consumer.each_message { ; }
 
       expect(tracer).to have_received(:start_active_span).with(
         'kafka.consumer',
-        child_of: context,
+        references: [reference],
         tags: {
           'component' => 'ruby-kafka',
           'span.kind' => 'consumer',
