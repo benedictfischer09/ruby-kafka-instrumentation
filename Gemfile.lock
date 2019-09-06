@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    kafka-opentracing (0.3.0)
+    kafka-opentracing (0.2.0)
       opentracing (~> 0.5.0)
 
 GEM
@@ -38,4 +38,4 @@ DEPENDENCIES
   ruby-kafka (>= 0.7.0)
 
 BUNDLED WITH
-   2.0.2
+   2.0.1

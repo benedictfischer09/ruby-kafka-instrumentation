@@ -194,7 +194,7 @@ RSpec.describe Kafka::Tracer do
 
       expect(tracer).to have_received(:start_active_span).with(
         'kafka.consumer',
-        follows_from: context,
+        child_of: context,
         tags: {
           'component' => 'ruby-kafka',
           'span.kind' => 'consumer',
@@ -273,7 +273,7 @@ RSpec.describe Kafka::Tracer do
 
       expect(tracer).to have_received(:start_active_span).with(
         'kafka.consumer',
-        follows_from: context,
+        child_of: context,
         tags: {
           'component' => 'ruby-kafka',
           'span.kind' => 'consumer',
