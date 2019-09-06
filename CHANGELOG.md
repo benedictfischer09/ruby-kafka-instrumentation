@@ -1,9 +1,6 @@
 Changelog
 =========
 
-## 0.3.0 09/06/2019
-  * Use follows from instead of child of semantics for consumer
-
 ## 0.2.0 08/16/2019
   * Catch load errors when kafka is not present
 
