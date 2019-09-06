@@ -73,7 +73,13 @@ module Kafka
           alias_method :deliver_message_original, :deliver_message
 
           def deliver_message(value, key: nil, headers: {}, topic:, partition: nil, partition_key: nil, retries: 1)
-            if ::Kafka::Tracer.ignore_message.call(value, key, headers, topic, partition, partition_key)
+            begin
+              skip = ::Kafka::Tracer.ignore_message.call(value, key, headers, topic, partition, partition_key)
+            rescue StandardError
+              skip = true
+            end
+
+            if skip
               result = deliver_message_original(value,
                                                 key: key,
                                                 headers: headers,
@@ -122,8 +128,13 @@ module Kafka
           alias_method :produce_original, :produce
 
           def produce(value, key: nil, headers: {}, topic:, partition: nil, partition_key: nil, create_time: Time.now)
+            begin
+              skip = ::Kafka::Tracer.ignore_message.call(value, key, headers, topic, partition, partition_key)
+            rescue StandardError
+              skip = true
+            end
 
-            if ::Kafka::Tracer.ignore_message.call(value, key, headers, topic, partition, partition_key)
+            if skip
               result = produce_original(
                 value,
                 key: key,
@@ -192,7 +203,7 @@ module Kafka
                 'message_bus.pre_fetched_in_batch' => true
               }
 
-              tracer.start_active_span('kafka.consumer', child_of: context, tags: tags) do |scope|
+              tracer.start_active_span('kafka.consumer', follows_from: context, tags: tags) do |scope|
                 begin
                   block.call(message)
                 rescue StandardError
@@ -232,7 +243,7 @@ module Kafka
                 'message_bus.pre_fetched_in_batch' => true
               }
 
-              tracer.start_active_span('kafka.consumer', child_of: context, tags: tags) do |scope|
+              tracer.start_active_span('kafka.consumer', follows_from: context, tags: tags) do |scope|
                 begin
                   yield message
                 rescue StandardError
